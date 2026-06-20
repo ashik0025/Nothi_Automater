@@ -1,13 +1,58 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
 // ==========================================
-// SECURITY SETTINGS
+// 1. SECURITY SETTINGS
 // ==========================================
-// Change this to whatever password you want to use.
-// Reminder: This is visible if someone inspects the code on GitHub!
 const MY_SECRET_PASSWORD = "admin"; 
+
+// ==========================================
+// 2. FIREBASE CLOUD DATABASE CONFIGURATION
+// ==========================================
+// When you upload to GitHub Pages, replace the empty strings below 
+// with the config keys from your free Firebase account.
+const myFirebaseConfig = {
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: ""
+};
+
+// (This code handles our preview environment automatically, and falls back to yours for GitHub Pages)
+let firebaseConfig;
+try {
+    firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : myFirebaseConfig;
+} catch (e) {
+    firebaseConfig = myFirebaseConfig;
+}
+const app_id_str = typeof __app_id !== 'undefined' ? __app_id : 'my-nothi-app-v1';
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const dbFirestore = getFirestore(app);
+
+// Authenticate securely before accessing cloud
+const initAuth = async () => {
+    try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+            await signInAnonymously(auth);
+        }
+    } catch (error) {
+        console.error("Authentication failed:", error);
+    }
+};
+initAuth();
+
+// ==========================================
+// 3. APP LOGIC & STATE
 // ==========================================
 
-
-// Default Database tailored to your setup
 const defaultDB = {
     "ভ্রমণ ও প্রটোকল": [
         { 
@@ -17,42 +62,71 @@ const defaultDB = {
     ]
 };
 
-// Initialize or load from LocalStorage
-let db = JSON.parse(localStorage.getItem('nothi_templates'));
-if (!db || Object.keys(db).length === 0) {
-    db = defaultDB;
-    saveDB();
-}
-
+let db = defaultDB; // In-memory database
 let isEditing = false;
 let editingCategory = "";
 let editingIndex = -1;
+let isDataLoaded = false;
 
-function saveDB() {
-    localStorage.setItem('nothi_templates', JSON.stringify(db));
+// Listen for Cloud Data Changes
+onAuthStateChanged(auth, (user) => {
+    if (!user) return;
+    
+    // We store all templates in a single cloud document
+    const docRef = doc(dbFirestore, 'artifacts', app_id_str, 'public', 'data', 'nothiTemplates', 'all');
+    
+    onSnapshot(docRef, (snapshot) => {
+        if (snapshot.exists()) {
+            db = snapshot.data().templates || defaultDB;
+        } else {
+            db = defaultDB;
+            saveDB(); // Initialize cloud with default templates if empty
+        }
+        
+        isDataLoaded = true;
+        
+        // Refresh UI if user is already logged in and using the app
+        if (sessionStorage.getItem('nothi_auth_token') === 'verified') {
+            if (document.getElementById('use-tab').style.display !== 'none') {
+                initAppUI();
+            } else {
+                renderManageList();
+            }
+        }
+    }, (error) => {
+        console.error("Cloud sync error:", error);
+        showToast("ক্লাউড ডাটাবেসের সাথে সংযোগ বিচ্ছিন্ন হয়েছে।");
+    });
+});
+
+// Save to Cloud
+async function saveDB() {
+    try {
+        const docRef = doc(dbFirestore, 'artifacts', app_id_str, 'public', 'data', 'nothiTemplates', 'all');
+        await setDoc(docRef, { templates: db });
+    } catch (error) {
+        console.error("Error saving:", error);
+        showToast("সংরক্ষণে সমস্যা হয়েছে!");
+    }
 }
 
 // ========== AUTHENTICATION LOGIC ==========
 
 window.onload = () => {
-    // Check if already logged in during this session
     if (sessionStorage.getItem('nothi_auth_token') === 'verified') {
         unlockApp();
     }
 };
 
-// Allow pressing 'Enter' key to login
-document.getElementById('passwordInput').addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') {
-        checkPassword();
-    }
-});
-
-function checkPassword() {
+window.checkPassword = function() {
     const passInput = document.getElementById('passwordInput').value;
     
     if (passInput === MY_SECRET_PASSWORD) {
-        // Save verification to session storage (clears when browser closes)
+        if (!isDataLoaded) {
+            showToast("ক্লাউড থেকে ডাটা লোড হচ্ছে, একটু অপেক্ষা করুন...");
+            setTimeout(window.checkPassword, 1000); // Try again in 1 second
+            return;
+        }
         sessionStorage.setItem('nothi_auth_token', 'verified');
         showToast("সফলভাবে প্রবেশ করেছেন!");
         unlockApp();
@@ -60,22 +134,28 @@ function checkPassword() {
         showToast("পাসওয়ার্ড ভুল হয়েছে! আবার চেষ্টা করুন।");
         document.getElementById('passwordInput').value = '';
     }
-}
+};
+
+document.getElementById('passwordInput').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        window.checkPassword();
+    }
+});
 
 function unlockApp() {
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('mainApp').classList.remove('hidden');
-    initApp(); // Load the data
+    initAppUI();
 }
 
-function logout() {
+window.logout = function() {
     sessionStorage.removeItem('nothi_auth_token');
-    location.reload(); // Refresh the page to show login screen
-}
+    location.reload(); 
+};
 
 // ========== TAB MANAGEMENT ==========
 
-function switchTab(tab) {
+window.switchTab = function(tab) {
     document.getElementById('use-tab').style.display = tab === 'use' ? 'block' : 'none';
     document.getElementById('manage-tab').style.display = tab === 'manage' ? 'grid' : 'none';
     
@@ -85,18 +165,18 @@ function switchTab(tab) {
     if(tab === 'use') {
         useBtn.className = "flex-1 py-2 px-4 rounded-lg bg-indigo-600 text-white font-semibold transition-colors shadow-sm";
         manageBtn.className = "flex-1 py-2 px-4 rounded-lg bg-transparent text-slate-600 hover:bg-slate-100 font-semibold transition-colors";
-        initApp();
+        initAppUI();
     } else {
         manageBtn.className = "flex-1 py-2 px-4 rounded-lg bg-indigo-600 text-white font-semibold transition-colors shadow-sm";
         useBtn.className = "flex-1 py-2 px-4 rounded-lg bg-transparent text-slate-600 hover:bg-slate-100 font-semibold transition-colors";
         renderManageList();
-        clearEditor();
+        window.clearEditor();
     }
-}
+};
 
 // ========== USE TAB LOGIC ==========
 
-function initApp() {
+function initAppUI() {
     const catSelect = document.getElementById('categorySelect');
     catSelect.innerHTML = '<option value="">-- ক্যাটাগরি নির্বাচন করুন --</option>';
     Object.keys(db).forEach(cat => {
@@ -108,7 +188,7 @@ function initApp() {
     document.getElementById('outputContainer').classList.add('hidden');
 }
 
-function loadTemplates() {
+window.loadTemplates = function() {
     const cat = document.getElementById('categorySelect').value;
     const tempSelect = document.getElementById('templateSelect');
     tempSelect.innerHTML = '<option value="">-- টেমপ্লেট নির্বাচন করুন --</option>';
@@ -120,9 +200,9 @@ function loadTemplates() {
     }
     document.getElementById('dynamicForm').classList.add('hidden');
     document.getElementById('outputContainer').classList.add('hidden');
-}
+};
 
-function generateForm() {
+window.generateForm = function() {
     const cat = document.getElementById('categorySelect').value;
     const tempIdx = document.getElementById('templateSelect').value;
     const formContainer = document.getElementById('dynamicForm');
@@ -158,9 +238,9 @@ function generateForm() {
         document.getElementById('outputContainer').classList.remove('hidden');
         document.getElementById('outputText').value = templateText;
     }
-}
+};
 
-function generateResult() {
+window.generateResult = function() {
     const cat = document.getElementById('categorySelect').value;
     const tempIdx = document.getElementById('templateSelect').value;
     let text = db[cat][tempIdx].text;
@@ -174,7 +254,7 @@ function generateResult() {
 
     document.getElementById('outputContainer').classList.remove('hidden');
     document.getElementById('outputText').value = text;
-}
+};
 
 // ========== MANAGE TAB LOGIC ==========
 
@@ -206,7 +286,7 @@ function renderManageList() {
     }
 }
 
-function editTemplate(category, index) {
+window.editTemplate = function(category, index) {
     isEditing = true;
     editingCategory = category;
     editingIndex = index;
@@ -222,9 +302,9 @@ function editTemplate(category, index) {
     btn.innerText = "আপডেট করুন (Update)";
     btn.classList.replace('bg-indigo-600', 'bg-emerald-600');
     btn.classList.replace('hover:bg-indigo-700', 'hover:bg-emerald-700');
-}
+};
 
-function clearEditor() {
+window.clearEditor = function() {
     isEditing = false;
     editingCategory = "";
     editingIndex = -1;
@@ -238,9 +318,9 @@ function clearEditor() {
     btn.innerText = "সংরক্ষণ করুন (Save)";
     btn.classList.replace('bg-emerald-600', 'bg-indigo-600');
     btn.classList.replace('hover:bg-emerald-700', 'hover:bg-indigo-700');
-}
+};
 
-function saveTemplate() {
+window.saveTemplate = function() {
     const cat = document.getElementById('editCategory').value.trim();
     const name = document.getElementById('editName').value.trim();
     const text = document.getElementById('editBody').value.trim();
@@ -260,40 +340,41 @@ function saveTemplate() {
         } else {
             db[cat][editingIndex] = { name, text };
         }
-        showToast("সফলভাবে আপডেট হয়েছে!");
+        showToast("সফলভাবে ক্লাউডে আপডেট হয়েছে!");
     } else {
         if (!db[cat]) db[cat] = [];
         db[cat].push({ name, text });
-        showToast("সফলভাবে সেভ হয়েছে!");
+        showToast("সফলভাবে ক্লাউডে সেভ হয়েছে!");
     }
 
     saveDB();
     renderManageList();
-    clearEditor();
-}
+    window.clearEditor();
+};
 
-function deleteTemplate(category, index) {
+window.deleteTemplate = function(category, index) {
     if(confirm("আপনি কি নিশ্চিত যে আপনি এই টেমপ্লেটটি মুছে ফেলতে চান?")) {
         db[category].splice(index, 1);
         if (db[category].length === 0) delete db[category];
+        
         saveDB();
         renderManageList();
         
         if(isEditing && editingCategory === category && editingIndex === index) {
-            clearEditor();
+            window.clearEditor();
         }
-        showToast("টেমপ্লেট মুছে ফেলা হয়েছে।");
+        showToast("টেমপ্লেট ক্লাউড থেকে মুছে ফেলা হয়েছে।");
     }
-}
+};
 
 // ========== UTILS ==========
 
-function copyText() {
+window.copyText = function() {
     const text = document.getElementById('outputText');
     text.select();
     document.execCommand('copy');
     showToast("টেক্সট কপি করা হয়েছে!");
-}
+};
 
 function showToast(message) {
     const toast = document.getElementById('toast');
