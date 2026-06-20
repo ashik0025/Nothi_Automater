@@ -12,13 +12,14 @@ const MY_SECRET_PASSWORD = "admin";
 // ==========================================
 // When you upload to GitHub Pages, replace the empty strings below 
 // with the config keys from your free Firebase account.
-const myFirebaseConfig = {
-    apiKey: "",
-    authDomain: "",
-    projectId: "",
-    storageBucket: "",
-    messagingSenderId: "",
-    appId: ""
+const firebaseConfig = {
+  apiKey: "AIzaSyBFd8Ib2Vtdzt_Ens2y_l3NRqYESaL2OOc",
+  authDomain: "nothi-automator.firebaseapp.com",
+  projectId: "nothi-automator",
+  storageBucket: "nothi-automator.firebasestorage.app",
+  messagingSenderId: "1017626249806",
+  appId: "1:1017626249806:web:732f6b36dddeb211ec111f",
+  measurementId: "G-2ZNENZ3F0J"
 };
 
 // (This code handles our preview environment automatically, and falls back to yours for GitHub Pages)
