@@ -13,12 +13,12 @@ const MY_SECRET_PASSWORD = "admin";
 // When you upload to GitHub Pages, replace the empty strings below 
 // with the config keys from your free Firebase account.
 const myFirebaseConfig = {
-    apiKey: "AIzaSyBFd8Ib2Vtdzt_Ens2y_l3NRqYESaL2OOc",
-    authDomain: "nothi-automator.firebaseapp.com",
-    projectId: "nothi-automator",
-    storageBucket: "nothi-automator.firebasestorage.app",
-    messagingSenderId: "1017626249806",
-    appId: "1:1017626249806:web:732f6b36dddeb211ec111f"
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: ""
 };
 
 // (This code handles our preview environment automatically, and falls back to yours for GitHub Pages)
@@ -66,7 +66,6 @@ let db = defaultDB; // In-memory database
 let isEditing = false;
 let editingCategory = "";
 let editingIndex = -1;
-let isDataLoaded = false;
 
 // Listen for Cloud Data Changes
 onAuthStateChanged(auth, (user) => {
@@ -82,8 +81,6 @@ onAuthStateChanged(auth, (user) => {
             db = defaultDB;
             saveDB(); // Initialize cloud with default templates if empty
         }
-        
-        isDataLoaded = true;
         
         // Refresh UI if user is already logged in and using the app
         if (sessionStorage.getItem('nothi_auth_token') === 'verified') {
@@ -122,11 +119,6 @@ window.checkPassword = function() {
     const passInput = document.getElementById('passwordInput').value;
     
     if (passInput === MY_SECRET_PASSWORD) {
-        if (!isDataLoaded) {
-            showToast("ক্লাউড থেকে ডাটা লোড হচ্ছে, একটু অপেক্ষা করুন...");
-            setTimeout(window.checkPassword, 1000); // Try again in 1 second
-            return;
-        }
         sessionStorage.setItem('nothi_auth_token', 'verified');
         showToast("সফলভাবে প্রবেশ করেছেন!");
         unlockApp();
