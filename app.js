@@ -1,15 +1,18 @@
+// ==========================================
+// SECURITY SETTINGS
+// ==========================================
+// Change this to whatever password you want to use.
+// Reminder: This is visible if someone inspects the code on GitHub!
+const MY_SECRET_PASSWORD = "admin"; 
+// ==========================================
+
+
 // Default Database tailored to your setup
 const defaultDB = {
     "ভ্রমণ ও প্রটোকল": [
         { 
             name: "যাতায়াত ভাতা অনুমোদন", 
             text: "বরাবর,\n[কর্মকর্তার পদবি],\nবাংলাদেশ কম্পিউটার কাউন্সিল,\nঢাকা।\n\nবিষয়: [ভ্রমণের স্থান] ভ্রমণের যাতায়াত ভাতা অনুমোদন প্রসঙ্গে।\n\nমহোদয়,\nসবিনয় নিবেদন এই যে, আমি নিম্নস্বাক্ষরকারী গত [ভ্রমণের তারিখ] তারিখে দাপ্তরিক প্রয়োজনে [ভ্রমণের স্থান] ভ্রমণ করি। উক্ত ভ্রমণের যাতায়াত বাবদ মোট [টাকার পরিমাণ] টাকা খরচ হয়েছে।\n\nঅতএব, উক্ত বিলটি অনুমোদনের জন্য বিনীত অনুরোধ করছি।\n\nনিবেদক,\n[আপনার নাম],\n[আপনার পদবি]" 
-        }
-    ],
-    "রক্ষণাবেক্ষণ": [
-        { 
-            name: "বিদ্যুৎ বিভ্রাট রিপোর্ট", 
-            text: "তারিখ: [তারিখ]\nবিষয়: এনডিসি-০৪ (NDC-04) এ বিদ্যুৎ বিভ্রাট সম্পর্কিত প্রতিবেদন।\n\nগত [ঘটনার তারিখ] তারিখে [সময়] ঘটিকায় ডাটা সেন্টারে একটি বিদ্যুৎ বিভ্রাটের ঘটনা ঘটে। ট্রান্সফরমার বুশিং ফ্ল্যাশওভারের কারণে এই সমস্যা দেখা দেয়। পরবর্তীতে জেনারেটরের মাধ্যমে ব্যাকআপ প্রদান করা হয় এবং [পুনরুদ্ধারের সময়] এ বিদ্যুৎ ব্যবস্থা স্বাভাবিক হয়।\n\nপরবর্তী নির্দেশনার জন্য প্রতিবেদনটি পেশ করা হলো।\n\nস্বাক্ষর:\n[আপনার নাম],\n[আপনার পদবি]" 
         }
     ]
 };
@@ -21,7 +24,6 @@ if (!db || Object.keys(db).length === 0) {
     saveDB();
 }
 
-// Variables to track if we are editing an existing template
 let isEditing = false;
 let editingCategory = "";
 let editingIndex = -1;
@@ -30,7 +32,49 @@ function saveDB() {
     localStorage.setItem('nothi_templates', JSON.stringify(db));
 }
 
-// Tab Management
+// ========== AUTHENTICATION LOGIC ==========
+
+window.onload = () => {
+    // Check if already logged in during this session
+    if (sessionStorage.getItem('nothi_auth_token') === 'verified') {
+        unlockApp();
+    }
+};
+
+// Allow pressing 'Enter' key to login
+document.getElementById('passwordInput').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        checkPassword();
+    }
+});
+
+function checkPassword() {
+    const passInput = document.getElementById('passwordInput').value;
+    
+    if (passInput === MY_SECRET_PASSWORD) {
+        // Save verification to session storage (clears when browser closes)
+        sessionStorage.setItem('nothi_auth_token', 'verified');
+        showToast("সফলভাবে প্রবেশ করেছেন!");
+        unlockApp();
+    } else {
+        showToast("পাসওয়ার্ড ভুল হয়েছে! আবার চেষ্টা করুন।");
+        document.getElementById('passwordInput').value = '';
+    }
+}
+
+function unlockApp() {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('mainApp').classList.remove('hidden');
+    initApp(); // Load the data
+}
+
+function logout() {
+    sessionStorage.removeItem('nothi_auth_token');
+    location.reload(); // Refresh the page to show login screen
+}
+
+// ========== TAB MANAGEMENT ==========
+
 function switchTab(tab) {
     document.getElementById('use-tab').style.display = tab === 'use' ? 'block' : 'none';
     document.getElementById('manage-tab').style.display = tab === 'manage' ? 'grid' : 'none';
@@ -207,7 +251,6 @@ function saveTemplate() {
     }
 
     if (isEditing) {
-        // If category changed, move it
         if (cat !== editingCategory) {
             db[editingCategory].splice(editingIndex, 1);
             if (db[editingCategory].length === 0) delete db[editingCategory];
@@ -236,7 +279,6 @@ function deleteTemplate(category, index) {
         saveDB();
         renderManageList();
         
-        // If deleting the one currently being edited, clear the form
         if(isEditing && editingCategory === category && editingIndex === index) {
             clearEditor();
         }
@@ -264,6 +306,3 @@ function showToast(message) {
         toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
     }, 3000);
 }
-
-// Run on load
-initApp();
