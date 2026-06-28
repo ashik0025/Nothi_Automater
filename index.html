@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>নথি টেমপ্লেট অটোমেটর</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --sidebar-bg: #1e293b;
+            --sidebar-hover: #334155;
+            --sidebar-active: #0f172a;
+            --sidebar-text: #e2e8f0;
+            --sidebar-muted: #94a3b8;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #eef2ff;
+            --success: #10b981;
+            --success-light: #ecfdf5;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --danger-light: #fef2f2;
+            --warning: #f59e0b;
+            --warning-light: #fffbeb;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-focus: #a5b4fc;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.06);
+            --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.15);
+            --radius-sm: 8px;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-bn: 'Noto Sans Bengali', 'SolaimanLipi', 'Bangla', system-ui, sans-serif;
+            --font-en: 'Inter', system-ui, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-bn);
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            transition: transform var(--transition);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+        }
+        .sidebar-header {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .sidebar-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: #fff;
+        }
+        .sidebar-header .logo .icon {
+            width: 42px;
+            height: 42px;
+            background: var(--primary);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .sidebar-header .subtitle {
+            font-size: 0.75rem;
+            color: var(--sidebar-muted);
+            margin-top: 4px;
+            font-family: var(--font-en);
+            letter-spacing: 0.3px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 12px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+        }
+        .sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+
+        .sidebar-section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--sidebar-muted);
+            padding: 12px 12px 8px;
+            font-family: var(--font-en);
+            font-weight: 600;
+        }
+
+        .sidebar .category-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition);
+            margin-bottom: 2px;
+            font-size: 0.9rem;
+            position: relative;
+            user-select: none;
+        }
+        .sidebar .category-item:hover {
+            background: var(--sidebar-hover);
+        }
+        .sidebar .category-item.active {
+            background: var(--sidebar-active);
+            font-weight: 600;
+            box-shadow: inset 3px 0 0 var(--primary);
+        }
+        .sidebar .category-item .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .sidebar .category-item .count {
+            margin-left: auto;
+            font-size: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-family: var(--font-en);
+            font-weight: 500;
+        }
+        .sidebar .category-item .actions-popup {
+            display: none;
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            gap: 4px;
+        }
+        .sidebar .category-item:hover .count {
+            opacity: 0;
+        }
+        .sidebar .category-item:hover .actions-popup {
+            display: flex;
+        }
+        .sidebar .btn-icon-sm {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            transition: all var(--transition);
+        }
+        .sidebar .btn-icon-sm:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .sidebar .btn-icon-sm.danger:hover {
+            background: var(--danger);
+        }
+
+        .sidebar-footer {
+            padding: 12px 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .sidebar-footer button {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: transparent;
+            color: var(--sidebar-text);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-bn);
+        }
+        .sidebar-footer button:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        .sidebar-footer .btn-add-cat {
+            background: var(--primary);
+            border-color: var(--primary);
+            font-weight: 600;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        .sidebar-footer .btn-add-cat:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 28px 32px;
+            min-height: 100vh;
+            transition: margin var(--transition);
+            width: 100%;
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+        .btn-hamburger {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            cursor: pointer;
+            font-size: 1.2rem;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition);
+        }
+        .btn-hamburger:hover {
+            box-shadow: var(--shadow);
+            background: #f8fafc;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            flex: 1;
+            min-width: 200px;
+        }
+        .page-title .cat-indicator {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            display: block;
+            font-family: var(--font-en);
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 8px 16px;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition);
+            min-width: 220px;
+        }
+        .search-box:focus-within {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        .search-box input {
+            border: none;
+            outline: none;
+            font-size: 0.9rem;
+            background: transparent;
+            width: 100%;
+            font-family: var(--font-bn);
+            color: var(--text);
+        }
+        .search-box .search-icon {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all var(--transition);
+            font-family: var(--font-bn);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            box-shadow: var(--shadow-sm);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+        .btn-outline {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            border-radius: 20px;
+        }
+        .btn-xs {
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            border-radius: 16px;
+            font-family: var(--font-en);
+        }
+        .btn-danger-text {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: var(--font-bn);
+            font-size: 0.8rem;
+            transition: all var(--transition);
+        }
+        .btn-danger-text:hover {
+            background: var(--danger-light);
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 18px;
+        }
+        .template-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: all var(--transition);
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .template-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+            border-color: #c7d2fe;
+        }
+        .template-card .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .template-card .card-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--text);
+            flex: 1;
+            line-height: 1.3;
+        }
+        .template-card .card-badge {
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            background: var(--primary-light);
+            color: var(--primary);
+            white-space: nowrap;
+            font-family: var(--font-en);
+        }
+        .template-card .card-preview {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            background: #f8fafc;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px dashed var(--border);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .template-card .card-preview .placeholder-highlight {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 0.78rem;
+        }
+        .template-card .card-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .template-card .card-actions button {
+            font-family: var(--font-bn);
+            font-size: 0.8rem;
+            padding: 7px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: all var(--transition);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .template-card .card-actions button:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+        .template-card .card-actions .btn-fill {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            font-weight: 600;
+        }
+        .template-card .card-actions .btn-fill:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+            grid-column: 1 / -1;
+        }
+        .empty-state .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.6;
+        }
+        .empty-state h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        .empty-state p {
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+            backdrop-filter: blur(4px);
+        }
+        .modal {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 28px 30px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-xl);
+            animation: slideUp 0.25s ease;
+            position: relative;
+        }
+        .modal h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: #f1f5f9;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+            color: var(--text-secondary);
+        }
+        .modal .close-btn:hover {
+            background: #e2e8f0;
+            color: var(--text);
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-family: var(--font-bn);
+            transition: all var(--transition);
+            background: #fafbfc;
+            color: var(--text);
+            resize: vertical;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08);
+            background: #fff;
+        }
+        .form-group textarea {
+            min-height: 160px;
+            line-height: 1.7;
+        }
+        .form-group .helper {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            font-family: var(--font-en);
+        }
+        .form-group .placeholder-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .form-group .placeholder-tag {
+            font-size: 0.78rem;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-family: var(--font-en);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .fill-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        .fill-form-card,
+        .fill-preview-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 22px 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+        .fill-form-card h4,
+        .fill-preview-card h4 {
+            margin-bottom: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .fill-preview-card .preview-output {
+            background: #fafbfc;
+            border: 1px dashed var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px 18px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            min-height: 100px;
+            color: var(--text);
+            font-family: var(--font-bn);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .fill-preview-card .preview-output .replaced {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        .btn-copy {
+            background: var(--success);
+            color: #fff;
+            border: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: var(--font-bn);
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+        .btn-copy:hover {
+            background: #059669;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+        .btn-copy.copied {
+            background: #047857;
+            animation: pulse 0.4s ease;
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            background: #1e293b;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            animation: slideInRight 0.35s ease, fadeOut 0.3s ease 2.5s forwards;
+            font-family: var(--font-bn);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 400px;
+        }
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .btn-hamburger {
+                display: flex;
+            }
+            .fill-container {
+                grid-template-columns: 1fr;
+            }
+            .template-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal {
+                width: 95%;
+                padding: 20px 16px;
+                border-radius: var(--radius-lg);
+            }
+        }
+        @media (max-width: 500px) {
+            .main-content {
+                padding: 16px 12px;
+            }
+            .top-bar {
+                gap: 8px;
+            }
+            .search-box {
+                min-width: 140px;
+                flex: 1;
+            }
+            .btn {
+                padding: 8px 14px;
+                font-size: 0.8rem;
+            }
+            .page-title {
+                font-size: 1.2rem;
+            }
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+        }
+        .sidebar-overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="icon">📋</span>
+                নথি টেমপ্লেট
+            </div>
+            <div class="subtitle">Template Automator</div>
+        </div>
+
+        <nav class="sidebar-nav" id="sidebarNav">
+            <div class="sidebar-section-title">📂 সকল ক্যাটেগরি</div>
+            <div class="category-item active" data-category="all" onclick="selectCategory('all')">
+                <span class="dot" style="background:#64748b;"></span>
+                সব টেমপ্লেট
+                <span class="count" id="countAll">0</span>
+                <span class="actions-popup"></span>
+            </div>
+            <div id="categoryList"></div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="btn-add-cat" onclick="openCategoryModal()">➕ নতুন ক্যাটেগরি</button>
+            <button onclick="exportData()">📥 এক্সপোর্ট (JSON)</button>
+            <button onclick="document.getElementById('importFileInput').click()">📤 ইম্পোর্ট (JSON)</button>
+            <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importData(event)">
+        </div>
+    </aside>
+
+    <main class="main-content" id="mainContent">
+        <div class="top-bar">
+            <button class="btn-hamburger" id="btnHamburger" onclick="toggleSidebar()" title="মেনু">☰</button>
+            <div class="page-title" id="pageTitle">
+                সব টেমপ্লেট
+                <span class="cat-indicator" id="catIndicator">All Templates</span>
+            </div>
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="টেমপ্লেট খুঁজুন..." oninput="renderTemplates()">
+            </div>
+            <button class="btn btn-primary" onclick="openTemplateModal()">➕ নতুন টেমপ্লেট</button>
+        </div>
+
+        <div class="template-grid" id="templateGrid"></div>
+        <div id="fillView" style="display:none;"></div>
+    </main>
+
+    <div id="modalContainer"></div>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        (function() {
+            const STORAGE_KEY = 'nothi_templates_data_v2';
+
+            function getDefaultData() {
+                return {
+                    categories: [
+                        { id: 'cat_demo1', name: 'সাধারণ নথি', color: '#4f46e5', createdAt: Date.now() },
+                        { id: 'cat_demo2', name: 'জরুরি নথি', color: '#ef4444', createdAt: Date.now() },
+                        { id: 'cat_demo3', name: 'অফিস আদেশ', color: '#10b981', createdAt: Date.now() },
+                    ],
+                    templates: [{
+                        id: 'tpl_demo1',
+                        categoryId: 'cat_demo1',
+                        name: 'অনুমতি পত্র (ছুটি)',
+                        text: 'বিষয়: {ছুটির_বিষয়}\nপ্রাপক: {প্রাপকের_নাম}\nতারিখ: {তারিখ}\n\nজনাব,\n\nআপনার {আবেদনের_তারিখ} তারিখের আবেদনের প্রেক্ষিতে জানানো যাচ্ছে যে, {ছুটির_কারণ} কারণে আপনার {ছুটির_মেয়াদ} দিনের ছুটি মঞ্জুর করা হলো।\n\nঅতএব, অনুগ্রহপূর্বক {যোগদানের_তারিখ} তারিখের মধ্যে অফিসে যোগদান করার জন্য নির্দেশ প্রদান করা হলো।\n\n{স্বাক্ষরকারীর_নাম}\n{পদবী}',
+                        createdAt: Date.now(),
+                        updatedAt: Date.now(),
+                    }, {
+                        id: 'tpl_demo2',
+                        categoryId: 'cat_demo2',
+                        name: 'জরুরি স্মারক',
+                        text: 'জরুরি স্মারক নং: {স্মারক_নম্বর}\nতারিখ: {তারিখ}\n\nবিষয়: {বিষয়}\n\nপ্রাপক: {প্রাপক}\n\nজনাব,\n\n{মূল_বক্তব্য}\n\nঅতএব, {প্রয়োজনীয়_পদক্ষেপ} গ্রহণের জন্য অনুরোধ করা হলো।\n\n{প্রেরকের_নাম}\n{প্রেরকের_পদবী}',
+                        createdAt: Date.now(),
+                        updatedAt: Date.now(),
+                    }, ],
+                };
+            }
+
+            function loadData() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (raw) {
+                        const data = JSON.parse(raw);
+                        if (data.categories && data.templates) return data;
+                    }
+                } catch (e) {}
+                return getDefaultData();
+            }
+
+            function saveData(data) {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                } catch (e) {
+                    showToast('⚠️ লোকাল স্টোরেজ পূর্ণ। দয়া করে ডেটা এক্সপোর্ট করে সংরক্ষণ করুন।', 'error');
+                }
+            }
+
+            let appData = loadData();
+            let selectedCategory = 'all';
+            let currentFillTemplateId = null;
+
+            function persistData() { saveData(appData); }
+
+            function generateId() {
+                return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            function extractPlaceholders(text) {
+                const regex = /\{([^{}]+)\}/g;
+                const placeholders = [];
+                const seen = new Set();
+                let match;
+                while ((match = regex.exec(text)) !== null) {
+                    const name = match[1].trim();
+                    if (name && !seen.has(name)) {
+                        seen.add(name);
+                        placeholders.push(name);
+                    }
+                }
+                return placeholders;
+            }
+
+            function highlightPlaceholdersInPreview(text) {
+                return text.replace(/\{([^{}]+)\}/g, '<span class="placeholder-highlight">{$1}</span>');
+            }
+
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            function showToast(message, type = 'success') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    if (toast.parentNode) toast.parentNode.removeChild(toast);
+                }, 3000);
+            }
+
+            function openModal(html, onClose) {
+                const container = document.getElementById('modalContainer');
+                container.innerHTML = `
+                    <div class="modal-overlay" id="modalOverlay">
+                        <div class="modal" id="modalBox">
+                            <button class="close-btn" id="modalCloseBtn">✕</button>
+                            ${html}
+                        </div>
+                    </div>
+                `;
+                document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+                document.getElementById('modalOverlay').addEventListener('click', function(e) {
+                    if (e.target === this) closeModal();
+                });
+                document.addEventListener('keydown', function escHandler(e) {
+                    if (e.key === 'Escape') {
+                        closeModal();
+                        document.removeEventListener('keydown', escHandler);
+                    }
+                });
+                if (onClose) window._modalOnClose = onClose;
+            }
+
+            function closeModal() {
+                document.getElementById('modalContainer').innerHTML = '';
+                if (window._modalOnClose) {
+                    const cb = window._modalOnClose;
+                    window._modalOnClose = null;
+                    cb();
+                }
+            }
+
+            function openCategoryModal(categoryId = null) {
+                const isEdit = !!categoryId;
+                let cat = null;
+                if (isEdit) {
+                    cat = appData.categories.find(c => c.id === categoryId);
+                    if (!cat) return;
+                }
+                const title = isEdit ? 'ক্যাটেগরি সম্পাদনা' : 'নতুন ক্যাটেগরি';
+                const html = `
+                    <h3>${isEdit ? '✏️' : '📁'} ${title}</h3>
+                    <div class="form-group">
+                        <label>ক্যাটেগরির নাম</label>
+                        <input type="text" id="catNameInput" value="${isEdit ? escapeHtml(cat.name) : ''}" placeholder="যেমন: সাধারণ নথি, জরুরি নথি...">
+                    </div>
+                    <div class="form-group">
+                        <label>রঙ</label>
+                        <input type="color" id="catColorInput" value="${isEdit ? cat.color : '#4f46e5'}" style="width:60px;height:40px;padding:4px;border-radius:8px;">
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-outline" onclick="closeModal()">বাতিল</button>
+                        <button class="btn btn-primary" id="btnSaveCat">সংরক্ষণ</button>
+                    </div>
+                `;
+                openModal(html);
+                setTimeout(() => {
+                    document.getElementById('btnSaveCat').addEventListener('click', () => {
+                        const name = document.getElementById('catNameInput').value.trim();
+                        const color = document.getElementById('catColorInput').value;
+                        if (!name) { showToast('ক্যাটেগরির নাম আবশ্যক', 'error'); return; }
+                        if (isEdit) { cat.name = name;
+                            cat.color = color; } else {
+                            appData.categories.push({ id: generateId(), name, color,
+                                createdAt: Date.now() });
+                        }
+                        persistData();
+                        closeModal();
+                        renderAll();
+                        showToast(isEdit ? 'ক্যাটেগরি আপডেট হয়েছে ✅' : 'ক্যাটেগরি তৈরি হয়েছে ✅');
+                    });
+                }, 100);
+            }
+
+            function deleteCategory(categoryId) {
+                const cat = appData.categories.find(c => c.id === categoryId);
+                if (!cat) return;
+                const templateCount = appData.templates.filter(t => t.categoryId === categoryId).length;
+                const confirmMsg = templateCount > 0 ?
+                    `"${cat.name}" ক্যাটেগরিতে ${templateCount}টি টেমপ্লেট আছে। ক্যাটেগরি ও সব টেমপ্লেট ডিলিট করবেন?` :
+                    `"${cat.name}" ক্যাটেগরি ডিলিট করবেন?`;
+                if (!confirm(confirmMsg)) return;
+                appData.templates = appData.templates.filter(t => t.categoryId !== categoryId);
+                appData.categories = appData.categories.filter(c => c.id !== categoryId);
+                if (selectedCategory === categoryId) selectedCategory = 'all';
+                persistData();
+                renderAll();
+                showToast('ক্যাটেগরি ডিলিট হয়েছে 🗑️');
+            }
+
+            function openTemplateModal(templateId = null, prefillCategoryId = null) {
+                const isEdit = !!templateId;
+                let tpl = null;
+                if (isEdit) {
+                    tpl = appData.templates.find(t => t.id === templateId);
+                    if (!tpl) return;
+                }
+                const catOptions = appData.categories.map(c =>
+                    `<option value="${c.id}" ${tpl && tpl.categoryId === c.id ? 'selected' : ''} ${!tpl && prefillCategoryId === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`
+                ).join('');
+                const title = isEdit ? 'টেমপ্লেট সম্পাদনা' : 'নতুন টেমপ্লেট';
+                const html = `
+                    <h3>${isEdit ? '✏️' : '📄'} ${title}</h3>
+                    <div class="form-group"><label>ক্যাটেগরি</label><select id="tplCategorySelect">${catOptions}</select></div>
+                    <div class="form-group"><label>টেমপ্লেটের নাম</label><input type="text" id="tplNameInput" value="${isEdit ? escapeHtml(tpl.name) : ''}" placeholder="যেমন: অনুমতি পত্র, স্মারক..."></div>
+                    <div class="form-group">
+                        <label>টেমপ্লেট টেক্সট</label>
+                        <textarea id="tplTextInput" placeholder="এখানে টেক্সট লিখুন। পরিবর্তনশীল অংশ {এভাবে} লিখুন। যেমন:&#10;&#10;বিষয়: {বিষয়}&#10;প্রাপক: {প্রাপকের_নাম}&#10;তারিখ: {তারিখ}&#10;&#10;জনাব,&#10;{মূল_বক্তব্য}&#10;&#10;ধন্যবাদ।">${isEdit ? escapeHtml(tpl.text) : ''}</textarea>
+                        <div class="helper">💡 পরিবর্তনশীল অংশ {কার্লি ব্রেস} দিয়ে চিহ্নিত করুন। যেমন: <code>{তারিখ}</code>, <code>{প্রাপকের_নাম}</code></div>
+                        <div class="placeholder-list" id="placeholderPreview"></div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-outline" onclick="closeModal()">বাতিল</button>
+                        <button class="btn btn-primary" id="btnSaveTpl">সংরক্ষণ</button>
+                    </div>
+                `;
+                openModal(html, () => { currentFillTemplateId = null; });
+                setTimeout(() => {
+                    const textarea = document.getElementById('tplTextInput');
+                    const previewDiv = document.getElementById('placeholderPreview');
+
+                    function updatePlaceholderPreview() {
+                        const placeholders = extractPlaceholders(textarea.value);
+                        previewDiv.innerHTML = placeholders.length === 0 ?
+                            '<span style="color:#94a3b8;font-size:0.78rem;">কোনো পরিবর্তনশীল অংশ পাওয়া যায়নি</span>' :
+                            '<span style="font-size:0.75rem;color:#64748b;margin-right:6px;">সনাক্তকৃত:</span>' +
+                            placeholders.map(p => `<span class="placeholder-tag">{${escapeHtml(p)}}</span>`).join(
+                                '');
+                    }
+                    textarea.addEventListener('input', updatePlaceholderPreview);
+                    updatePlaceholderPreview();
+                    document.getElementById('btnSaveTpl').addEventListener('click', () => {
+                        const categoryId = document.getElementById('tplCategorySelect').value;
+                        const name = document.getElementById('tplNameInput').value.trim();
+                        const text = document.getElementById('tplTextInput').value;
+                        if (!categoryId) { showToast('ক্যাটেগরি নির্বাচন করুন', 'error'); return; }
+                        if (!name) { showToast('টেমপ্লেটের নাম আবশ্যক', 'error'); return; }
+                        if (!text.trim()) { showToast('টেমপ্লেট টেক্সট আবশ্যক', 'error'); return; }
+                        if (isEdit) {
+                            tpl.categoryId = categoryId;
+                            tpl.name = name;
+                            tpl.text = text;
+                            tpl.updatedAt = Date.now();
+                        } else {
+                            appData.templates.push({ id: generateId(), categoryId, name, text,
+                                createdAt: Date.now(), updatedAt: Date.now() });
+                        }
+                        persistData();
+                        closeModal();
+                        renderAll();
+                        showToast(isEdit ? 'টেমপ্লেট আপডেট হয়েছে ✅' : 'টেমপ্লেট তৈরি হয়েছে ✅');
+                    });
+                }, 100);
+            }
+
+            function duplicateTemplate(templateId) {
+                const tpl = appData.templates.find(t => t.id === templateId);
+                if (!tpl) return;
+                appData.templates.push({ ...tpl, id: generateId(), name: tpl.name + ' (কপি)',
+                    createdAt: Date.now(), updatedAt: Date.now() });
+                persistData();
+                renderAll();
+                showToast('টেমপ্লেট কপি হয়েছে 📋');
+            }
+
+            function deleteTemplate(templateId) {
+                const tpl = appData.templates.find(t => t.id === templateId);
+                if (!tpl) return;
+                if (!confirm(`"${tpl.name}" টেমপ্লেট ডিলিট করবেন?`)) return;
+                appData.templates = appData.templates.filter(t => t.id !== templateId);
+                if (currentFillTemplateId === templateId) backToTemplates();
+                persistData();
+                renderAll();
+                showToast('টেমপ্লেট ডিলিট হয়েছে 🗑️');
+            }
+
+            // ============ FIXED FILL FUNCTIONS ============
+
+            function updateFillPreview() {
+                const fillView = document.getElementById('fillView');
+                if (!fillView || fillView.style.display === 'none') return;
+                const templateText = fillView.dataset.templateText || '';
+                const previewOutput = document.getElementById('fillPreviewOutput');
+                if (!previewOutput) return;
+                const inputs = fillView.querySelectorAll('input[data-placeholder]');
+                const replacements = [];
+                inputs.forEach(input => {
+                    replacements.push({ placeholder: input.dataset.placeholder, value: input.value
+                            .trim() });
+                });
+                // Sort descending by placeholder length to avoid substring conflicts
+                replacements.sort((a, b) => b.placeholder.length - a.placeholder.length);
+                let result = templateText;
+                replacements.forEach(({ placeholder, value }) => {
+                    const escaped = placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp('\\{' + escaped + '\\}', 'g');
+                    result = value ?
+                        result.replace(regex, `<span class="replaced">${escapeHtml(value)}</span>`) :
+                        result.replace(regex,
+                            `<span class="placeholder-highlight">{${escapeHtml(placeholder)}}</span>`);
+                });
+                previewOutput.innerHTML = result || '<span style="color:#94a3b8;">প্রিভিউ এখানে দেখাবে...</span>';
+            }
+
+            function copyFillOutput() {
+                const fillView = document.getElementById('fillView');
+                const templateText = fillView.dataset.templateText || '';
+                const inputs = fillView.querySelectorAll('input[data-placeholder]');
+                const replacements = [];
+                inputs.forEach(input => {
+                    replacements.push({ placeholder: input.dataset.placeholder, value: input.value.trim() ||
+                            `{${input.dataset.placeholder}}` });
+                });
+                replacements.sort((a, b) => b.placeholder.length - a.placeholder.length);
+                let result = templateText;
+                replacements.forEach(({ placeholder, value }) => {
+                    const escaped = placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    result = result.replace(new RegExp('\\{' + escaped + '\\}', 'g'), value);
+                });
+                copyToClipboard(result);
+                const btn = document.getElementById('btnCopyFill');
+                if (btn) {
+                    btn.textContent = '✅ কপি হয়েছে!';
+                    btn.classList.add('copied');
+                    setTimeout(() => { btn.textContent = '📋 কপি করুন';
+                        btn.classList.remove('copied'); }, 2000);
+                }
+            }
+
+            function generateFillText() {
+                updateFillPreview();
+                const previewCard = document.querySelector('.fill-preview-card');
+                if (previewCard) previewCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                showToast('✅ টেক্সট জেনারেট হয়েছে! নিচে দেখুন ও কপি করুন।', 'success');
+            }
+
+            function openFillView(templateId) {
+                const tpl = appData.templates.find(t => t.id === templateId);
+                if (!tpl) return;
+                currentFillTemplateId = templateId;
+                const placeholders = extractPlaceholders(tpl.text);
+                const cat = appData.categories.find(c => c.id === tpl.categoryId);
+                const fillView = document.getElementById('fillView');
+
+                if (placeholders.length === 0) {
+                    fillView.innerHTML = `
+                        <div style="margin-bottom:20px;">
+                            <button class="btn btn-outline btn-sm" onclick="backToTemplates()">← ফিরে যান</button>
+                            <span style="margin-left:12px;font-weight:700;">${escapeHtml(tpl.name)}</span>
+                            ${cat ? `<span style="font-size:0.75rem;color:${cat.color};margin-left:8px;">● ${escapeHtml(cat.name)}</span>` : ''}
+                        </div>
+                        <div class="fill-container">
+                            <div class="fill-preview-card" style="grid-column:1/-1;">
+                                <h4>📄 সম্পূর্ণ টেক্সট</h4>
+                                <div class="preview-output">${escapeHtml(tpl.text)}</div>
+                                <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+                                    <button class="btn-copy" onclick="copyOutput(this, '${escapeHtml(tpl.text).replace(/'/g, "\\'")}')">📋 কপি করুন</button>
+                                    <button class="btn btn-outline btn-sm" onclick="openTemplateModal('${templateId}')">✏️ সম্পাদনা</button>
+                                </div>
+                            </div>
+                        </div>`;
+                    document.getElementById('templateGrid').style.display = 'none';
+                    fillView.style.display = 'block';
+                    document.getElementById('pageTitle').textContent = tpl.name;
+                    document.getElementById('catIndicator').textContent = cat ? cat.name : '';
+                    return;
+                }
+
+                let formFieldsHtml = placeholders.map((ph, i) => `
+                    <div class="form-group">
+                        <label for="fill_${i}">${escapeHtml(ph.replace(/_/g, ' '))}</label>
+                        <input type="text" id="fill_${i}" data-placeholder="${escapeHtml(ph)}" placeholder="${escapeHtml(ph.replace(/_/g, ' '))} লিখুন..." oninput="updateFillPreview()">
+                    </div>`).join('');
+
+                fillView.innerHTML = `
+                    <div style="margin-bottom:20px;">
+                        <button class="btn btn-outline btn-sm" onclick="backToTemplates()">← ফিরে যান</button>
+                        <span style="margin-left:12px;font-weight:700;">${escapeHtml(tpl.name)}</span>
+                        ${cat ? `<span style="font-size:0.75rem;color:${cat.color};margin-left:8px;">● ${escapeHtml(cat.name)}</span>` : ''}
+                        <span style="font-size:0.75rem;color:var(--text-secondary);margin-left:8px;">(${placeholders.length}টি ঘর পূরণ করতে হবে)</span>
+                    </div>
+                    <div class="fill-container">
+                        <div class="fill-form-card">
+                            <h4>✍️ ঘরগুলো পূরণ করুন</h4>
+                            ${formFieldsHtml}
+                            <button class="btn btn-primary" onclick="generateFillText()" style="margin-top:16px; width:100%; justify-content:center;">
+                                🔄 জেনারেট করুন
+                            </button>
+                        </div>
+                        <div class="fill-preview-card">
+                            <h4>👁️ লাইভ প্রিভিউ</h4>
+                            <div class="preview-output" id="fillPreviewOutput">${highlightPlaceholdersInPreview(tpl.text)}</div>
+                            <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+                                <button class="btn-copy" id="btnCopyFill" onclick="copyFillOutput()">📋 কপি করুন</button>
+                                <button class="btn btn-outline btn-sm" onclick="openTemplateModal('${templateId}')">✏️ টেমপ্লেট সম্পাদনা</button>
+                            </div>
+                        </div>
+                    </div>`;
+                document.getElementById('templateGrid').style.display = 'none';
+                fillView.style.display = 'block';
+                fillView.dataset.templateText = tpl.text;
+                document.getElementById('pageTitle').textContent = tpl.name;
+                document.getElementById('catIndicator').textContent = cat ? cat.name : '';
+                setTimeout(() => {
+                    const firstInput = document.getElementById('fill_0');
+                    if (firstInput) firstInput.focus();
+                }, 200);
+                updateFillPreview();
+            }
+
+            function copyOutput(btn, text) {
+                const txt = document.createElement('textarea');
+                txt.innerHTML = text;
+                copyToClipboard(txt.value);
+                btn.textContent = '✅ কপি হয়েছে!';
+                btn.classList.add('copied');
+                setTimeout(() => { btn.textContent = '📋 কপি করুন';
+                    btn.classList.remove('copied'); }, 2000);
+            }
+
+            function copyToClipboard(text) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(() => showToast('টেক্সট কপি হয়েছে! 📋')).catch(
+                        () => fallbackCopy(text));
+                } else fallbackCopy(text);
+            }
+
+            function fallbackCopy(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try { document.execCommand('copy');
+                    showToast('টেক্সট কপি হয়েছে! 📋'); } catch (e) { showToast(
+                        'কপি করতে ব্যর্থ। ম্যানুয়ালি সিলেক্ট করে কপি করুন।', 'error'); }
+                document.body.removeChild(textarea);
+            }
+
+            function backToTemplates() {
+                currentFillTemplateId = null;
+                document.getElementById('fillView').style.display = 'none';
+                document.getElementById('fillView').innerHTML = '';
+                document.getElementById('templateGrid').style.display = '';
+                renderAll();
+            }
+
+            // ============ RENDER ============
+            function renderCategories() {
+                const categoryList = document.getElementById('categoryList');
+                document.getElementById('countAll').textContent = appData.templates.length;
+                document.querySelector('.category-item[data-category="all"]')?.classList.toggle('active',
+                    selectedCategory === 'all');
+                categoryList.innerHTML = appData.categories.map(cat => {
+                    const count = appData.templates.filter(t => t.categoryId === cat.id).length;
+                    return `
+                        <div class="category-item ${selectedCategory === cat.id ? 'active' : ''}" data-category="${cat.id}" onclick="selectCategory('${cat.id}')">
+                            <span class="dot" style="background:${cat.color};"></span>
+                            ${escapeHtml(cat.name)}
+                            <span class="count">${count}</span>
+                            <span class="actions-popup">
+                                <button class="btn-icon-sm" onclick="event.stopPropagation();openCategoryModal('${cat.id}')" title="সম্পাদনা">✎</button>
+                                <button class="btn-icon-sm danger" onclick="event.stopPropagation();deleteCategory('${cat.id}')" title="ডিলিট">×</button>
+                            </span>
+                        </div>`;
+                }).join('');
+            }
+
+            function renderTemplates() {
+                const grid = document.getElementById('templateGrid');
+                const searchQuery = document.getElementById('searchInput')?.value?.toLowerCase() || '';
+                let filtered = appData.templates;
+                if (selectedCategory !== 'all') filtered = filtered.filter(t => t.categoryId === selectedCategory);
+                if (searchQuery) filtered = filtered.filter(t => t.name.toLowerCase().includes(searchQuery) || t
+                    .text.toLowerCase().includes(searchQuery));
+                filtered.sort((a, b) => (b.updatedAt || b.createdAt) - (a.updatedAt || a.createdAt));
+                if (filtered.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📭</div>
+                            <h3>কোনো টেমপ্লেট পাওয়া যায়নি</h3>
+                            <p>${searchQuery ? 'অন্য কিছু সার্চ করে দেখুন।' : 'একটি নতুন টেমপ্লেট তৈরি করুন।'}</p>
+                            ${!searchQuery ? '<button class="btn btn-primary" onclick="openTemplateModal()">➕ নতুন টেমপ্লেট</button>' : ''}
+                        </div>`;
+                    return;
+                }
+                grid.innerHTML = filtered.map(tpl => {
+                    const cat = appData.categories.find(c => c.id === tpl.categoryId);
+                    const placeholders = extractPlaceholders(tpl.text);
+                    const previewHtml = highlightPlaceholdersInPreview(tpl.text.length > 200 ? tpl.text
+                        .substring(0, 200) + '...' : tpl.text);
+                    return `
+                        <div class="template-card" onclick="openFillView('${tpl.id}')">
+                            <div class="card-header">
+                                <div class="card-title">${escapeHtml(tpl.name)}</div>
+                                ${placeholders.length > 0 ? `<span class="card-badge">${placeholders.length} ঘর</span>` : '<span class="card-badge" style="background:#f1f5f9;color:#64748b;">সরল</span>'}
+                            </div>
+                            ${cat ? `<div style="font-size:0.7rem;color:${cat.color};font-weight:500;">● ${escapeHtml(cat.name)}</div>` : ''}
+                            <div class="card-preview">${previewHtml}</div>
+                            <div class="card-actions" onclick="event.stopPropagation();">
+                                <button class="btn-fill" onclick="openFillView('${tpl.id}')">✍️ পূরণ করুন</button>
+                                <button onclick="openTemplateModal('${tpl.id}')">✏️ সম্পাদনা</button>
+                                <button onclick="duplicateTemplate('${tpl.id}')">📋 কপি</button>
+                                <button class="btn-danger-text" onclick="deleteTemplate('${tpl.id}')">🗑️</button>
+                            </div>
+                        </div>`;
+                }).join('');
+                updatePageTitle();
+            }
+
+            function updatePageTitle() {
+                const titleEl = document.getElementById('pageTitle');
+                const catIndicator = document.getElementById('catIndicator');
+                if (currentFillTemplateId) {
+                    const tpl = appData.templates.find(t => t.id === currentFillTemplateId);
+                    if (tpl) {
+                        titleEl.textContent = tpl.name;
+                        catIndicator.textContent = (appData.categories.find(c => c.id === tpl.categoryId) || {})
+                            .name || '';
+                    }
+                } else if (selectedCategory === 'all') {
+                    titleEl.textContent = 'সব টেমপ্লেট';
+                    catIndicator.textContent = 'All Templates';
+                } else {
+                    const cat = appData.categories.find(c => c.id === selectedCategory);
+                    titleEl.textContent = cat ? cat.name : 'টেমপ্লেট';
+                    catIndicator.textContent = cat ?
+                        `${appData.templates.filter(t=>t.categoryId===selectedCategory).length} templates` : '';
+                }
+            }
+
+            function renderAll() {
+                if (currentFillTemplateId) {
+                    const tpl = appData.templates.find(t => t.id === currentFillTemplateId);
+                    tpl ? openFillView(currentFillTemplateId) : backToTemplates();
+                }
+                renderCategories();
+                renderTemplates();
+                updatePageTitle();
+            }
+
+            function selectCategory(categoryId) {
+                if (currentFillTemplateId && !confirm('আপনি বর্তমান ফিল ভিউ থেকে বের হয়ে যাবেন। চালিয়ে যাবেন?')) return;
+                backToTemplates();
+                selectedCategory = categoryId;
+                renderAll();
+                closeSidebarOnMobile();
+            }
+
+            function toggleSidebar() {
+                document.getElementById('sidebar').classList.toggle('open');
+                document.getElementById('sidebarOverlay').classList.toggle('show');
+            }
+
+            function closeSidebarOnMobile() {
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('sidebarOverlay').classList.remove('show');
+            }
+            document.getElementById('sidebarOverlay').addEventListener('click', closeSidebarOnMobile);
+
+            function exportData() {
+                const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `nothi-templates-backup-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showToast('ডেটা এক্সপোর্ট হয়েছে! 📥 ফাইলটি Google Drive-এ সংরক্ষণ করতে পারেন।');
+            }
+
+            function importData(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (!imported.categories || !imported.templates) throw new Error('Invalid');
+                        if (!confirm(
+                                `ইম্পোর্টকৃত ডেটায় ${imported.categories.length}টি ক্যাটেগরি ও ${imported.templates.length}টি টেমপ্লেট আছে। বর্তমান ডেটার সাথে মার্জ করবেন?\n\n"OK" = মার্জ, "Cancel" = বাতিল`
+                                )) {
+                            if (confirm('বর্তমান সব ডেটা রিপ্লেস করবেন?')) appData = imported;
+                            else return;
+                        } else {
+                            const existCat = new Set(appData.categories.map(c => c.id));
+                            const existTpl = new Set(appData.templates.map(t => t.id));
+                            imported.categories.forEach(c => { if (!existCat.has(c.id)) appData.categories.push(
+                                c); });
+                            imported.templates.forEach(t => { if (!existTpl.has(t.id)) appData.templates.push(
+                                t); });
+                        }
+                        persistData();
+                        renderAll();
+                        showToast('ডেটা ইম্পোর্ট সফল! ✅');
+                    } catch (err) { showToast('ফাইল ফরম্যাট সঠিক নয়।', 'error'); }
+                };
+                reader.readAsText(file);
+                event.target.value = '';
+            }
+
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.shiftKey && e.key === 'N') {
+                    e.preventDefault();
+                    openTemplateModal(null, selectedCategory !== 'all' ? selectedCategory : null);
+                }
+                if (e.ctrlKey && e.shiftKey && e.key === 'E') { e.preventDefault();
+                    exportData(); }
+            });
+
+            // Expose to global scope
+            window.selectCategory = selectCategory;
+            window.openCategoryModal = openCategoryModal;
+            window.deleteCategory = deleteCategory;
+            window.openTemplateModal = openTemplateModal;
+            window.deleteTemplate = deleteTemplate;
+            window.duplicateTemplate = duplicateTemplate;
+            window.openFillView = openFillView;
+            window.updateFillPreview = updateFillPreview;
+            window.copyFillOutput = copyFillOutput;
+            window.generateFillText = generateFillText;
+            window.copyOutput = copyOutput;
+            window.backToTemplates = backToTemplates;
+            window.toggleSidebar = toggleSidebar;
+            window.exportData = exportData;
+            window.importData = importData;
+            window.closeModal = closeModal;
+
+            if (appData.categories.length === 0 && appData.templates.length === 0) {
+                appData = getDefaultData();
+                persistData();
+            }
+            renderAll();
+            console.log('✅ নথি টেমপ্লেট অটোমেটর রেডি! Ctrl+Shift+N = নতুন টেমপ্লেট, Ctrl+Shift+E = এক্সপোর্ট');
+        })();
+    </script>
+</body>
+</html>
